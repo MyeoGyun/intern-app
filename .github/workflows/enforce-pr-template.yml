@@ -22,7 +22,7 @@ jobs:
       - name: Read PR template into env
         id: read
         run: |
-          echo "TEMPLATE<<'EOF'" >> $GITHUB_ENV
+          echo "TEMPLATE<<EOF" >> $GITHUB_ENV
           cat .github/pull_request_template.md >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
