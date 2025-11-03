@@ -1,0 +1,45 @@
+name: Enforce PR Template (dev -> main)
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize]
+    branches: ["main"]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  enforce:
+    if: ${{ github.event.pull_request.head.ref == 'dev' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout default branch contents
+        uses: actions/checkout@v4
+        with:
+          # pull_request_target 컨텍스트에서는 base 레포 내용을 체크아웃
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Read PR template into env
+        id: read
+        run: |
+          echo "TEMPLATE<<'EOF'" >> $GITHUB_ENV
+          cat .github/pull_request_template.md >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Ensure PR body contains template
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const current = context.payload.pull_request.body || "";
+            const template = process.env.TEMPLATE.trim();
+
+            // 간단한 판별: 템플릿의 핵심 헤더가 없으면 덮어쓰기
+            const mustHave = "## 📌 요약";
+            if (!current.includes(mustHave)) {
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                body: template
+              });
+            }
