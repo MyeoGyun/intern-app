@@ -1,9 +1,6 @@
 name: Discord Notification
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     types: [closed]
     branches:
@@ -11,8 +8,8 @@ on:
 
 jobs:
   notify-merge:
-    # PR이 merge되어 닫힌 경우에만 실행
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    # PR이 merge되어 닫힌 경우에만 실행 (단순히 닫힌 경우는 제외)
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Send Discord Notification
