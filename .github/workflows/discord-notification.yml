@@ -1,0 +1,31 @@
+name: Discord Notification
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  notify-merge:
+    # PR이 merge되어 닫힌 경우에만 실행
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Notification
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "✅ Main 브랜치에 새로운 변경사항이 병합되었습니다!"
+          description: |
+            **커밋 메시지**: ${{ github.event.head_commit.message || github.event.pull_request.title }}
+            **작성자**: ${{ github.event.head_commit.author.name || github.event.pull_request.user.login }}
+            **브랜치**: ${{ github.ref_name }}
+
+            [커밋 보기](${{ github.event.head_commit.url || github.event.pull_request.html_url }})
+          color: 0x00ff00
+          username: "Intern App Bot"
+          avatar_url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
