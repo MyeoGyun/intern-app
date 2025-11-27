@@ -48,3 +48,7 @@ htmlcov/
 
 # Docker
 .dockerignore
+
+# Data
+data/
+archive/
